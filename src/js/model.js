@@ -1,5 +1,6 @@
-import { API_URL, RES_PER_PAGE} from "./config";
-import { getJSON } from "./helpers";
+import { async } from "regenerator-runtime";
+import { API_URL, RES_PER_PAGE, KEY} from "./config";
+import { getJSON, sendJSON } from "./helpers";
 
 export const state = {
     recipe: {},
@@ -91,9 +92,42 @@ export const deleteBookmark = function(id) {
     persistBookmarks();
 }
 
+export const uploadRecipe = async function(newRecipe) {
+    // console.log(newRecipe);
+    const ingredients = Object.entries(newRecipe).filter(item => item[0].startsWith('ingredient') && item[1] !== '').map(ing => {
+        const [quantity, unit, description] = ing[1].replaceAll(' ', '').split(',');
+        return {quantity: quantity ? +quantity : null, unit, description};
+    });
+    console.log(ingredients);
+    const new_Recipe = {
+        title: newRecipe.title,
+        source_url: newRecipe.sourceUrl,
+        image_url: newRecipe.image,
+        publisher: newRecipe.publisher,
+        cooking_time: +newRecipe.cookingTime,
+        servings: +newRecipe.servings,
+        ingredients
+    }
+    // console.log(recipe);
+    const data = await sendJSON(`${API_URL}?key=${KEY}`, new_Recipe);
+    console.log(data);
+    const {recipe} = data.data;
+    state.recipe = {
+    id: recipe.id,
+    title: recipe.title,
+    publisher: recipe.publisher,
+    sourceUrl: recipe.source_url,
+    image: recipe.image_url,
+    servings: recipe.servings,
+    cookingTime: recipe.cooking_time,
+    ingredients: recipe.ingredients
+    };
+    console.log(state.recipe);
+}
+
 const init = function() {
     const storage = localStorage.getItem('bookmarks');
     if(storage) state.bookmarks = JSON.parse(storage);
 };
 init();
-console.log(state.bookmarks);
+// console.log(state.bookmarks);

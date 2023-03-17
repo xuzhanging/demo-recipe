@@ -6,6 +6,7 @@ import searchView from './views/searchView';
 import resultsView from './views/resultsView';
 import paginationView from './views/paginationView';
 import bookmarksView from './views/bookmarksView';
+import addRecipeView from './views/addRecipeView';
 
 const recipeContainer = document.querySelector('.recipe');
 
@@ -74,6 +75,14 @@ const controlBookmarks = function() {
   bookmarksView.render(model.state.bookmarks);
 }
 
+const controlAddRecipe =  async function(newRecipe) {
+  await model.uploadRecipe(newRecipe);
+  console.log(model.state.recipe);
+  setTimeout(function() {
+    addRecipeView.toggleWindow();
+  }, 2000);
+}
+
 const init = function() {
   bookmarksView.addHandlerRender(controlBookmarks);
   recipeView.addHandlerRender(controlRecipes);
@@ -81,5 +90,8 @@ const init = function() {
   recipeView.addHandlerAddBookmark(controlAddBookmark);
   searchView.addHandleSearch(controlSearchResult);
   paginationView.addHandlerClick(controlPagination);
+  addRecipeView.addHandlerShowWindow();
+  addRecipeView.addHandlerHideWindow();
+  addRecipeView.addHandlerUpload(controlAddRecipe);
 };
 init();
